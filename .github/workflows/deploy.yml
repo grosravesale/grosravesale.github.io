@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  schedule:
+    # TODO: Set a proper schedule
+    - cron: "0 0 1 1 *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-calendar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: grosravesale/calendar
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+      - run: npm install
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-calendar
+          path: dist
+          retention-days: 1
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build-calendar]
+    environment:
+      name: github-pages
+      url: ${{ steps.deployement.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-calendar
+          path: "."
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+      - id: deployment
+        uses: actions/deploy-pages@v4
