@@ -19,6 +19,10 @@ concurrency:
 jobs:
   build-calendar:
     runs-on: ubuntu-latest
+    env:
+      GOOGLE_ACCOUNT_EMAIL: ${{ secrets.GOOGLE_ACCOUNT_EMAIL }}
+      GOOGLE_ACCOUNT_PRIVATE_KEY: ${{ secrets.GOOGLE_ACCOUNT_PRIVATE_KEY }}
+      GOOGLE_SHEETS_ID: ${{ secrets.GOOGLE_SHEETS_ID }}
     steps:
       - uses: actions/checkout@v4
         with:
